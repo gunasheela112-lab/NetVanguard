@@ -28,3 +28,33 @@ NetVanguard is a high-performance, multi-threaded CLI network diagnostic and sec
 
 ## Architecture & Logic Flow
 
+---
+
+## Installation
+
+```bash
+git clone https://github.com/gunasheela112-lab/NetVanguard.git
+cd NetVanguard
+python main.py
+No external dependencies — built entirely with Python's standard library.
+Usage
+Run the script and enter a target IP or hostname when prompted:
+Enter Target IP or Domain: 192.168.1.1
+The tool pings the host, scans critical ports concurrently, and prints a risk-tagged audit report to the console. Results are also appended to reports/audit_log.json.
+Sample Output
+=================================================================
+ NETVANGUARD - MARITIME & ENTERPRISE AUDIT SUITE
+=================================================================
+Target Host : 192.168.1.1
+Scan Time   : 2026-09-04 14:22:10
+
+[*] Initiating Host Diagnostic...
+[+] Host Status: ONLINE!
+
+[*] Concurrently Auditing Critical Ports via Multi-Threading...
+ - Port 21    (FTP)   : CLOSED          [SECURE] | Unencrypted File Transfer - Risk of Credential Theft
+ - Port 22    (SSH)   : OPEN [ACTIVE]   [LOW RISK] | Encrypted Administrative Remote Shell
+ - Port 80    (HTTP)  : OPEN [ACTIVE]   [HIGH RISK] | Cleartext Web Traffic - Recommend Enforcing HTTPS (443)
+
+[+] Audit Complete! Log appended to reports/audit_log.json
+=================================================================
