@@ -5,7 +5,7 @@ import socket
 import subprocess
 
 
-def ping_host(host):
+def ping_host(host: str) -> bool:
     param = "-n" if platform.system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
     response = subprocess.run(
@@ -14,7 +14,7 @@ def ping_host(host):
     return response.returncode == 0
 
 
-def scan_single_port(ip, port, result_queue):
+def def scan_single_port(ip: str, port: int, result_queue: queue.Queue) -> None:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1.0)
