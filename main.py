@@ -1,7 +1,9 @@
 import json
 import os
+import queue
 import threading
 from datetime import datetime
+
 from scanner import ping_host, scan_single_port
 
 PORT_SECURITY_DB = {
@@ -40,7 +42,7 @@ PORT_SECURITY_DB = {
 
 def run_audit(target):
     print("\n" + "=" * 65)
-    print("        NETVANGUARD - MARITIME & ENTERPRISE AUDIT SUITE        ")
+    print(" NETVANGUARD - MARITIME & ENTERPRISE AUDIT SUITE ")
     print("=" * 65)
     print(f"Target Host : {target}")
     print(f"Scan Time   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -50,15 +52,16 @@ def run_audit(target):
         print("[-] Target Offline / Unreachable.")
         print("[*] Performing Auto-Triage: Check Local Gateway & ISP/VSAT.\n")
         return
-
     print("[+] Host Status: ONLINE!\n")
+
     print("[*] Concurrently Auditing Critical Ports via Multi-Threading...")
 
-    open_ports = []
+    result_queue = queue.Queue()
     threads = []
+
     for port in PORT_SECURITY_DB.keys():
         t = threading.Thread(
-            target=scan_single_port, args=(target, port, open_ports)
+            target=scan_single_port, args=(target, port, result_queue)
         )
         threads.append(t)
         t.start()
@@ -66,13 +69,16 @@ def run_audit(target):
     for t in threads:
         t.join()
 
+    open_ports = []
+    while not result_queue.empty():
+        open_ports.append(result_queue.get())
+
     audit_summary = []
     for port, meta in PORT_SECURITY_DB.items():
         is_open = port in open_ports
         status = "OPEN [ACTIVE]" if is_open else "CLOSED"
         risk_tag = f"[{meta['risk']} RISK]" if is_open else "[SECURE]"
-
-        line = f"  - Port {port:<5} ({meta['service']:<5}) : {status:<15} {risk_tag} | {meta['detail']}"
+        line = f" - Port {port:<5} ({meta['service']:<5}) : {status:<15} {risk_tag} | {meta['detail']}"
         print(line)
         audit_summary.append(
             {
