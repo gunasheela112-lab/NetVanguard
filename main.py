@@ -104,6 +104,9 @@ def run_audit(target):
 
 
 if __name__ == "__main__":
-    target_ip = input("Enter Target IP or Domain: ")
-    run_audit(target_ip)
+    target_ip = input("Enter Target IP or Domain: ").strip()
+    if not target_ip:
+        print("[-] No target provided. Please enter a valid IP or domain.")
+    else:
+        run_audit(target_ip)
   
