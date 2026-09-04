@@ -1,0 +1,2 @@
+# No external dependencies — built entirely with Python's standard library
+# (os, platform, socket, subprocess, threading, queue, json, datetime)
