@@ -2,6 +2,7 @@ import json
 import os
 import queue
 import threading
+import argparse
 from datetime import datetime
 
 from scanner import ping_host, scan_single_port
@@ -104,7 +105,18 @@ def run_audit(target):
 
 
 if __name__ == "__main__":
-    target_ip = input("Enter Target IP or Domain: ").strip()
+    parser = argparse.ArgumentParser(
+        description="NetVanguard - Network Diagnostic & Security Audit Tool"
+    )
+    parser.add_argument(
+        "-t", "--target",
+        help="Target IP address or domain to audit"
+    )
+    args = parser.parse_args()
+
+    target_ip = args.target if args.target else input("Enter Target IP or Domain: ")
+    target_ip = target_ip.strip()
+
     if not target_ip:
         print("[-] No target provided. Please enter a valid IP or domain.")
     else:
