@@ -9,6 +9,7 @@
  
 
 ![Platform](https://img.shields.io/badge/Platform-CLI-lightgrey)
+
 NetVanguard is a high-performance, multi-threaded CLI network diagnostic and security auditing engine written in Python. Designed for enterprise networks and mission-critical maritime IT infrastructure, it automates host connectivity monitoring, performs transport layer security audits, and generates persistent operational incident logs.
 
 ---
