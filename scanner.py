@@ -1,5 +1,6 @@
 import os
 import platform
+import queue
 import socket
 import subprocess
 
@@ -13,13 +14,13 @@ def ping_host(host):
     return response.returncode == 0
 
 
-def scan_single_port(ip, port, open_ports):
+def scan_single_port(ip, port, result_queue):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1.0)
         result = s.connect_ex((ip, port))
         if result == 0:
-            open_ports.append(port)
+            result_queue.put(port)
         s.close()
     except Exception:
         pass
