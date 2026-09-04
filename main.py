@@ -41,7 +41,7 @@ PORT_SECURITY_DB = {
 }
 
 
-def run_audit(target):
+def run_audit(target: str) -> None:
     print("\n" + "=" * 65)
     print(" NETVANGUARD - MARITIME & ENTERPRISE AUDIT SUITE ")
     print("=" * 65)
