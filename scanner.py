@@ -14,7 +14,7 @@ def ping_host(host: str) -> bool:
     return response.returncode == 0
 
 
-def def scan_single_port(ip: str, port: int, result_queue: queue.Queue) -> None:
+def scan_single_port(ip: str, port: int, result_queue: queue.Queue) -> None:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1.0)
