@@ -57,12 +57,16 @@ def scan_single_port(host: str, port: int, result_queue: queue.Queue, timeout: f
     sock.settimeout(max(float(timeout), 0.1))
     try:
         result = sock.connect_ex((host, port))
-        result_queue.put({
-            "port": port,
-            "status": "open" if result == 0 else "closed",
-            "error": None,
-        })
-    except (OSError, socket.timeout) as exc:
+        if result == 0:
+            status, error = "open", None
+        elif result in (111, 10061):
+            status, error = "closed", None
+        else:
+            status, error = "filtered", f"Connection returned error code {result}"
+        result_queue.put({"port": port, "status": status, "error": error})
+    except socket.timeout as exc:
+        result_queue.put({"port": port, "status": "filtered", "error": str(exc)})
+    except OSError as exc:
         result_queue.put({"port": port, "status": "error", "error": str(exc)})
     finally:
         sock.close()
