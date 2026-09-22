@@ -1,7 +1,12 @@
+import json
 import queue
+import tempfile
+from pathlib import Path
 import socket
 import unittest
 from unittest.mock import MagicMock, patch
+
+from main import run_audit
 
 from scanner import ping_host, ping_host_diagnostic, resolve_host, scan_single_port
 
@@ -62,6 +67,15 @@ class TestScanSinglePort(unittest.TestCase):
         self.assertEqual(result_queue.get()["status"], "closed")
 
     @patch("scanner.socket.socket")
+    def test_port_timeout_is_filtered(self, mock_socket_class):
+        mock_socket = MagicMock()
+        mock_socket.connect_ex.side_effect = socket.timeout()
+        mock_socket_class.return_value = mock_socket
+        result_queue = queue.Queue()
+        scan_single_port("192.168.1.1", 22, result_queue)
+        self.assertEqual(result_queue.get()["status"], "filtered")
+
+    @patch("scanner.socket.socket")
     def test_port_error(self, mock_socket_class):
         mock_socket = MagicMock()
         mock_socket.connect_ex.side_effect = OSError("network error")
@@ -72,6 +86,23 @@ class TestScanSinglePort(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertIn("network error", result["error"])
 
+
+class TestAuditReport(unittest.TestCase):
+    @patch("main.resolve_host", return_value="127.0.0.1")
+    @patch("main.ping_host_diagnostic", return_value={"reachable": True, "latency_ms": 1.2, "error": None})
+    @patch("main.scan_single_port")
+    def test_audit_writes_jsonl_report(self, mock_scan, mock_ping, mock_resolve):
+        def add_result(host, port, result_queue, timeout):
+            result_queue.put({"port": port, "status": "open" if port == 22 else "closed", "error": None})
+
+        mock_scan.side_effect = add_result
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = str(Path(temp_dir) / "audit.jsonl")
+            self.assertEqual(run_audit("127.0.0.1", output=output), 0)
+            report = json.loads(Path(output).read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(report["summary"]["open_ports"], 1)
+            self.assertEqual(report["summary"]["ports_scanned"], 6)
+            self.assertIn("duration_ms", report)
 
 if __name__ == "__main__":
     unittest.main()
