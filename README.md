@@ -1,97 +1,122 @@
 # NetVanguard: Automated Network Diagnostic & Security Audit Tool
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
-
- 
-
 ![License](https://img.shields.io/badge/License-MIT-green)
-
- 
-
 ![Platform](https://img.shields.io/badge/Platform-CLI-lightgrey)
 
-NetVanguard is a high-performance, multi-threaded CLI network diagnostic and security auditing engine written in Python. Designed for enterprise networks and mission-critical maritime IT infrastructure, it automates host connectivity monitoring, performs transport layer security audits, and generates persistent operational incident logs.
-
----
+NetVanguard is a lightweight, multi-threaded CLI network diagnostic and security auditing tool written in Python. It checks host reachability, measures ICMP response latency, audits selected TCP ports concurrently, classifies exposed services by risk, and writes structured JSON Lines audit records.
 
 ## Core Capabilities
 
-* **Automated ICMP Health Diagnostics:** Executes non-blocking reachability tests with real-time latency and packet loss verification.
-* **Concurrent Transport Layer Auditing:** Utilizes multi-threading to scan mission-critical ports in parallel with zero sequential lag.
-* **Security Risk Categorization:** Evaluates exposed attack surfaces and flags risks (Cleartext FTP/HTTP, exposed RDP endpoints).
-* **Shift-Handover JSON Logging:** Automatically documents audit timestamps, host availability, and port exposures to persistent log files (`reports/audit_log.json`).
+- **Host Health Diagnostics:** Performs a single ICMP echo test and records response latency.
+- **Concurrent TCP Auditing:** Scans configured TCP ports in parallel with per-port timeouts.
+- **Clear Port Statuses:** Reports ports as `open`, `closed`, `filtered`, or `error`.
+- **Security Risk Categorization:** Flags exposed services such as FTP, HTTP, and RDP according to the local risk database.
+- **Structured Logging:** Appends one valid JSON object per line to the configured report.
+- **Scan Summary:** Records the number of ports scanned, open ports, and total scan duration.
+- **Automation-Friendly CLI:** Supports command-line targets, configurable timeouts, custom report paths, and meaningful exit codes.
 
----
+> **Scope:** NetVanguard performs basic TCP connectivity checks. It is not a vulnerability scanner or a substitute for a full security assessment. Only scan systems you own or are authorized to test.
 
-## Critical Monitored Services
+## Monitored TCP Services
 
-| Port Number | Protocol | Service Description | Security Audit Focus |
+| Port | Protocol | Service | Security Audit Focus |
 | :--- | :--- | :--- | :--- |
-| **21** | TCP | FTP | Cleartext File Transfer Audit |
-| **22** | TCP | SSH | Remote Administration Access |
-| **53** | UDP/TCP | DNS | Name Resolution Pipeline Health |
-| **80** | TCP | HTTP | Unencrypted Web Traffic Detection |
-| **443** | TCP | HTTPS | Encrypted Web Service Verification |
-| **3389** | TCP | RDP | Remote Desktop Exposure Check |
+| **21** | TCP | FTP | Cleartext file transfer |
+| **22** | TCP | SSH | Remote administration exposure |
+| **53** | TCP | DNS | Resolution service exposure |
+| **80** | TCP | HTTP | Unencrypted web traffic |
+| **443** | TCP | HTTPS | Secure web service |
+| **3389** | TCP | RDP | Remote desktop exposure |
 
----
+## Architecture
 
-## Architecture & Logic Flow
-
-1. User provides a target IP or hostname.
-2. The tool sends an ICMP ping to confirm the host is reachable.
-3. If online, it spins up a thread per monitored port to scan concurrently.
-4. Each open port is cross-referenced against a risk database (FTP, SSH, DNS, HTTP, HTTPS, RDP).
-5. Results are printed to the console with risk tags and appended to a JSON audit log for record-keeping.
-
----
+1. Resolve the target hostname to IPv4.
+2. Send one ICMP echo request and record reachability and latency.
+3. If reachable, scan the configured TCP ports concurrently.
+4. Classify open services using `config.py`.
+5. Print a human-readable audit summary.
+6. Append a JSON Lines record containing the scan results and summary.
 
 ## Installation
 
-```bash
-git clone https://github.com/gunasheela112-lab/NetVanguard.git
-cd NetVanguard
-python main.py
-```
+Clone the repository and move into the project directory:
 
-No external dependencies — built entirely with Python's standard library.
+`git clone https://github.com/gunasheela112-lab/NetVanguard.git`
 
----
+`cd NetVanguard`
+
+No external Python packages are required because NetVanguard uses Python's standard library.
 
 ## Usage
 
-Run the script and enter a target IP or hostname when prompted:
+### Interactive Mode
 
-```
-Enter Target IP or Domain: 192.168.1.1
-```
+Run:
 
-The tool pings the host, scans critical ports concurrently, and prints a risk-tagged audit report to the console. Results are also appended to `reports/audit_log.json`.
+`python main.py`
 
----
+The program will ask for the target IP address or domain.
 
-## Sample Output
+### Command-Line Mode
 
-```
-=================================================================
- NETVANGUARD - MARITIME & ENTERPRISE AUDIT SUITE
-=================================================================
-Target Host : 192.168.1.1
-Scan Time   : 2026-09-04 14:22:10
+Run NetVanguard by providing the target directly:
 
-[*] Initiating Host Diagnostic...
-[+] Host Status: ONLINE!
+`python main.py --target 192.168.1.1`
 
-[*] Concurrently Auditing Critical Ports via Multi-Threading...
- - Port 21    (FTP)   : CLOSED          [SECURE] | Unencrypted File Transfer - Risk of Credential Theft
- - Port 22    (SSH)   : OPEN [ACTIVE]   [LOW RISK] | Encrypted Administrative Remote Shell
- - Port 80    (HTTP)  : OPEN [ACTIVE]   [HIGH RISK] | Cleartext Web Traffic - Recommend Enforcing HTTPS (443)
+You can also specify a custom TCP timeout:
 
-[+] Audit Complete! Log appended to reports/audit_log.json
-=================================================================
-```
+`python main.py --target example.com --timeout 2`
 
----
+To save the report to a custom location:
+
+`python main.py --target 192.168.1.1 --output reports/nightly.jsonl`
+
+The default report is saved to `reports/audit_log.jsonl`.
+
+Each scan is stored as one JSON object per line, making the report easy to append to and process later.
+
+## Exit Codes
+
+| Code | Meaning |
+| :--- | :--- |
+| **0** | Audit completed successfully |
+| **1** | Target could be resolved but was unreachable |
+| **2** | Invalid input or target resolution failure |
+
+## Testing
+
+Run the complete test suite with:
+
+`python -m unittest -v`
+
+The tests cover host reachability, hostname resolution, TCP port states, timeout handling, socket errors, and report generation.
+
+GitHub Actions also runs the test suite automatically when changes are pushed or pull requests are created.
+
+## Project Structure
+
+`NetVanguard/`
+
+`├── .github/`
+
+`│   └── workflows/`
+
+`│       └── tests.yml`
+
+`├── config.py`
+
+`├── main.py`
+
+`├── scanner.py`
+
+`├── test_scanner.py`
+
+`├── requirements.txt`
+
+`├── LICENSE`
+
+`└── README.md`
 
 ## License
 
