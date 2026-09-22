@@ -1,3 +1,4 @@
+import errno
 import json
 import queue
 import tempfile
@@ -60,7 +61,7 @@ class TestScanSinglePort(unittest.TestCase):
     @patch("scanner.socket.socket")
     def test_port_closed(self, mock_socket_class):
         mock_socket = MagicMock()
-        mock_socket.connect_ex.return_value = 1
+        mock_socket.connect_ex.return_value = errno.ECONNREFUSED
         mock_socket_class.return_value = mock_socket
         result_queue = queue.Queue()
         scan_single_port("192.168.1.1", 22, result_queue)
