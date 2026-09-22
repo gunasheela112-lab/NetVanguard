@@ -1,3 +1,4 @@
+import errno
 import platform
 import queue
 import socket
@@ -59,7 +60,7 @@ def scan_single_port(host: str, port: int, result_queue: queue.Queue, timeout: f
         result = sock.connect_ex((host, port))
         if result == 0:
             status, error = "open", None
-        elif result in (111, 10061):
+        elif result in (errno.ECONNREFUSED, 10061):
             status, error = "closed", None
         else:
             status, error = "filtered", f"Connection returned error code {result}"
