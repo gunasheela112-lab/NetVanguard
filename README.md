@@ -6,6 +6,10 @@
 
 NetVanguard is a lightweight, multi-threaded CLI network diagnostic and security auditing tool written in Python. It checks host reachability, measures ICMP response latency, audits selected TCP ports concurrently, classifies exposed services by risk, and writes structured JSON Lines audit records.
 
+## Demo
+
+![NetVanguard CLI audit output](assets/netvanguard-demo.jpg)
+
 ## Core Capabilities
 
 - **Host Health Diagnostics:** Performs a single ICMP echo test and records response latency.
