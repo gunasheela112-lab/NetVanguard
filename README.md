@@ -8,7 +8,7 @@ NetVanguard is a lightweight, multi-threaded CLI network diagnostic and security
 
 ## Demo
 
-![NetVanguard CLI audit output](assets/netvanguard-demo.jpg)
+![NetVanguard CLI audit output](netvanguard-demo.jpg)
 
 ## Core Capabilities
 
