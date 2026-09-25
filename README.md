@@ -1,5 +1,8 @@
 # NetVanguard: Automated Network Diagnostic & Security Audit Tool
 
+
+![CI](https://img.shields.io/github/actions/workflow/status/gunasheela112-lab/NetVanguard/tests.yml?branch=main&label=CI)
+
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Platform](https://img.shields.io/badge/Platform-CLI-lightgrey)
